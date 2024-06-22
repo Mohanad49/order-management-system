@@ -24,4 +24,9 @@ export class OrdersController {
   ) {
     return this.ordersService.updateOrderStatus(orderId, updateOrderStatusDto);
   }
+
+  @Get('user/:userId/orders')
+  getOrderHistory(@Param('userId') userId: string) {
+    return this.ordersService.getOrderHistory(+userId);
+  }
 }

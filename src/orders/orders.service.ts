@@ -81,4 +81,11 @@ export class OrdersService {
 
     return updatedOrder;
   }
+
+  async getOrderHistory(userId: number) {
+    return this.prisma.order.findMany({
+      where: { userId },
+      include: { OrderItem: true },
+    });
+  }
 }
