@@ -2,8 +2,9 @@ import { Controller, Post, Get, Put, Param, Body } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { CouponDto } from './dto/coupon.dto';
 
-@Controller('orders')
+@Controller('api/orders')
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
@@ -25,8 +26,8 @@ export class OrdersController {
     return this.ordersService.updateOrderStatus(orderId, updateOrderStatusDto);
   }
 
-  @Get('user/:userId/orders')
-  getOrderHistory(@Param('userId') userId: string) {
-    return this.ordersService.getOrderHistory(+userId);
+  @Post('/apply-coupon')
+  async applyCoupon(@Body() couponDto: CouponDto) {
+    return this.ordersService.applyCoupon(couponDto);
   }
 }

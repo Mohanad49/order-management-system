@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { CouponDto } from './dto/coupon.dto';
 
 @Injectable()
 export class OrdersService {
@@ -48,8 +49,9 @@ export class OrdersService {
   }
 
   async getOrderById(orderId: number) {
+    const parsedOrderId = parseInt(orderId.toString(), 10);
     const order = await this.prisma.order.findUnique({
-      where: { orderId },
+      where: { orderId: parsedOrderId },
       include: { OrderItem: { include: { product: true } } },
     });
 
@@ -65,9 +67,10 @@ export class OrdersService {
     updateOrderStatusDto: UpdateOrderStatusDto,
   ) {
     const { status } = updateOrderStatusDto;
+    const parsedOrderId = parseInt(orderId.toString(), 10);
 
     const order = await this.prisma.order.findUnique({
-      where: { orderId },
+      where: { orderId: parsedOrderId },
     });
 
     if (!order) {
@@ -83,9 +86,54 @@ export class OrdersService {
   }
 
   async getOrderHistory(userId: number) {
+    const parsedUserId = parseInt(userId.toString(), 10);
     return this.prisma.order.findMany({
-      where: { userId },
-      include: { OrderItem: true },
+      where: { userId: parsedUserId },
+      include: { OrderItem: { include: { product: true } } },
     });
+  }
+  async applyCoupon(couponDto: CouponDto) {
+    const { orderId, code } = couponDto;
+
+    // Find the order by orderId
+    const order = await this.prisma.order.findUnique({
+      where: { orderId },
+      include: { OrderItem: { include: { product: true } } },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Find the coupon by code
+    const coupon = await this.prisma.coupon.findUnique({
+      where: { code },
+    });
+
+    if (!coupon) {
+      throw new NotFoundException('Coupon not found');
+    }
+
+    // Check if the coupon is still valid
+    if (coupon.validUntil < new Date()) {
+      throw new BadRequestException('Coupon has expired');
+    }
+
+    // Calculate the discount and update the order
+    const discountAmount = order.OrderItem.reduce((total, item) => {
+      return (
+        total + item.quantity * item.product.price * (coupon.discount / 100)
+      );
+    }, 0);
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { orderId },
+      data: {
+        status: 'Discount Applied',
+        discount: discountAmount,
+      },
+    });
+
+    return updatedOrder;
   }
 }
