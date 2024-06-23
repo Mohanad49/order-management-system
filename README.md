@@ -1,73 +1,157 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Order Management System
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This is an Order Management System built with NestJS and Prisma, which allows users to manage carts and orders, apply coupons, and retrieve order history. It includes endpoints for adding items to the cart, creating orders, applying discounts, and retrieving user order history.
 
-## Installation
+## Prerequisites
 
-```bash
-$ npm install
-```
+- Node.js (>= 14.x)
+- npm (>= 6.x)
+- PostgreSQL
 
-## Running the app
+## Getting Started
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
+### 1. Clone the repository
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone <repository_url>
+cd order-management-system
 ```
 
-## Support
+### 2. Install dependencies
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm install
+```
 
-## Stay in touch
+### 3. Set up the database
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Create a PostgreSQL database and note down the database URL.
+
+### 4. Configure environment variables
+
+Create a `.env` file in the root of the project and add your database URL:
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/your-database-name
+```
+
+### 5. Generate Prisma Client
+
+Run the following command to generate the Prisma client:
+
+```bash
+npx prisma generate
+```
+
+### 6. Migrate the database
+
+Run the Prisma migration to set up the database schema:
+
+```bash
+npx prisma migrate dev --name init
+```
+
+### 7. Seed the database
+
+To seed the database with dummy data, use the following command:
+
+```bash
+npx ts-node prisma/seed.ts
+```
+
+### 8. Start the server
+
+Run the following command to start the NestJS server:
+
+```bash
+npm run start:dev
+```
+
+The server will start at `http://localhost:3000`.
+
+## API Endpoints
+
+### Cart Endpoints
+
+- **Add to Cart**
+  - **POST** `/api/cart/add`
+  - **Body**:
+    ```json
+    {
+      "userId": 1,
+      "productId": 1,
+      "quantity": 2
+    }
+    ```
+
+- **Get Cart**
+  - **GET** `/api/cart/:userId`
+
+- **Update Cart**
+  - **PATCH** `/api/cart/update`
+  - **Body**:
+    ```json
+    {
+      "userId": 1,
+      "productId": 1,
+      "quantity": 3
+    }
+    ```
+
+- **Remove from Cart**
+  - **DELETE** `/api/cart/remove`
+  - **Body**:
+    ```json
+    {
+      "userId": 1,
+      "productId": 1
+    }
+    ```
+
+### Order Endpoints
+
+- **Create Order**
+  - **POST** `/api/orders`
+  - **Body**:
+    ```json
+    {
+      "userId": 1,
+      "address": "123 Main St"
+    }
+    ```
+
+- **Get Order by ID**
+  - **GET** `/api/orders/:orderId`
+
+- **Apply Coupon**
+  - **POST** `/api/orders/apply-coupon`
+  - **Body**:
+    ```json
+    {
+      "orderId": 1,
+      "code": "DISCOUNT10"
+    }
+    ```
+
+- **Get User Order History**
+  - **GET** `/api/users/:userId/orders`
+
+## Testing
+
+You can test the endpoints using Postman or any other API client by sending the appropriate requests to the server. Ensure you have seeded the database with the necessary data before testing.
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License.
+
+---
+
+### Notes
+
+- Ensure your PostgreSQL database is running and accessible.
+- Make sure to update the `DATABASE_URL` in the `.env` file with your actual database credentials.
+- Use the dummy data provided in the seed file for initial testing.
+
+---
